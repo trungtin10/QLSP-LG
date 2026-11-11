@@ -1,13 +1,82 @@
 import { useState, useRef } from "react";
-import { QrCode, X, Printer, Download, Copy, ExternalLink, Check } from "lucide-react";
+import { QrCode, X, Printer, Download, Copy, ExternalLink, Check, Sliders } from "lucide-react";
 import { QRCodeCanvas } from "qrcode.react";
 import { toast } from "sonner";
 
+// Các kích thước tem in tiêu chuẩn cho các loại máy in tem nhãn và A4
+const SIZE_PRESETS = [
+  {
+    id: "sm",
+    label: "Nhỏ (S)",
+    sub: "40×35 mm",
+    qrDisplaySize: 150,
+    printBoxWidth: 190,
+    printQrSize: 130,
+    headerSize: 10,
+    codeSize: 13,
+    nameSize: 11,
+    infoSize: 9.5,
+  },
+  {
+    id: "md",
+    label: "Chuẩn (M)",
+    sub: "60×50 mm",
+    qrDisplaySize: 200,
+    printBoxWidth: 250,
+    printQrSize: 170,
+    headerSize: 11,
+    codeSize: 16,
+    nameSize: 12,
+    infoSize: 11,
+  },
+  {
+    id: "lg",
+    label: "Lớn (L)",
+    sub: "80×70 mm",
+    qrDisplaySize: 240,
+    printBoxWidth: 320,
+    printQrSize: 220,
+    headerSize: 12.5,
+    codeSize: 18,
+    nameSize: 13.5,
+    infoSize: 12,
+  },
+  {
+    id: "xl",
+    label: "Đại (XL)",
+    sub: "100×90 mm",
+    qrDisplaySize: 270,
+    printBoxWidth: 390,
+    printQrSize: 270,
+    headerSize: 14,
+    codeSize: 22,
+    nameSize: 15,
+    infoSize: 13.5,
+  },
+];
+
 export default function DeviceQrModal({ product, onClose }) {
   const [copied, setCopied] = useState(false);
+  const [selectedSizeId, setSelectedSizeId] = useState("md");
+  const [customQrSize, setCustomQrSize] = useState(200);
+  const [isCustomMode, setIsCustomMode] = useState(false);
   const canvasRef = useRef(null);
 
   if (!product) return null;
+
+  // Lấy cấu hình kích thước hiện tại
+  const currentPreset = SIZE_PRESETS.find((s) => s.id === selectedSizeId) || SIZE_PRESETS[1];
+  
+  // Kích thước QR hiển thị trên màn hình
+  const activeQrSize = isCustomMode ? customQrSize : currentPreset.qrDisplaySize;
+  
+  // Kích thước khi in thực tế (tính theo tỷ lệ nếu ở chế độ tùy chỉnh)
+  const printWidth = isCustomMode ? Math.round(customQrSize * 1.3) : currentPreset.printBoxWidth;
+  const printQr = isCustomMode ? customQrSize : currentPreset.printQrSize;
+  const headerFont = isCustomMode ? Math.max(9, Math.round(customQrSize * 0.055)) : currentPreset.headerSize;
+  const codeFont = isCustomMode ? Math.max(12, Math.round(customQrSize * 0.08)) : currentPreset.codeSize;
+  const nameFont = isCustomMode ? Math.max(10, Math.round(customQrSize * 0.06)) : currentPreset.nameSize;
+  const infoFont = isCustomMode ? Math.max(9, Math.round(customQrSize * 0.055)) : currentPreset.infoSize;
 
   // Luôn lấy URL tra cứu theo domain hiện tại của trình duyệt (ví dụ: https://qlsp-lg.onrender.com/scan/TB-001)
   const scanUrl = `${window.location.origin}/scan/${encodeURIComponent(product.code)}`;
@@ -39,9 +108,9 @@ export default function DeviceQrModal({ product, onClose }) {
     }
     const link = document.createElement("a");
     link.href = qrImage;
-    link.download = `QR_${product.code}_${product.name.replace(/\s+/g, "_")}.png`;
+    link.download = `QR_${product.code}_${product.name.replace(/\s+/g, "_")}_${activeQrSize}px.png`;
     link.click();
-    toast.success(`Đã tải xuống mã QR của [${product.code}]`);
+    toast.success(`Đã tải xuống mã QR (${activeQrSize}px) của [${product.code}]`);
   };
 
   const handlePrintLabel = () => {
@@ -59,7 +128,7 @@ export default function DeviceQrModal({ product, onClose }) {
           <title>Tem QR - ${product.code}</title>
           <style>
             @media print {
-              @page { margin: 4mm; size: auto; }
+              @page { margin: 3mm; size: auto; }
               body { margin: 0; padding: 0; }
             }
             body { 
@@ -71,9 +140,9 @@ export default function DeviceQrModal({ product, onClose }) {
               color: #000;
             }
             .label-box { 
-              width: 250px; 
+              width: ${printWidth}px; 
               border: 2px dashed #000; 
-              padding: 12px; 
+              padding: 10px; 
               border-radius: 8px; 
               margin: 0 auto; 
               box-sizing: border-box; 
@@ -81,23 +150,23 @@ export default function DeviceQrModal({ product, onClose }) {
               background: #fff;
             }
             .header {
-              font-size: 11px;
+              font-size: ${headerFont}px;
               font-weight: 800;
               text-transform: uppercase;
               color: #111;
-              margin-bottom: 6px;
+              margin-bottom: 5px;
               letter-spacing: 0.5px;
               border-bottom: 1px solid #ddd;
-              padding-bottom: 4px;
+              padding-bottom: 3px;
             }
             .qr-img { 
-              width: 170px; 
-              height: 170px; 
-              margin: 0 auto 6px; 
+              width: ${printQr}px; 
+              height: ${printQr}px; 
+              margin: 0 auto 4px; 
               display: block; 
             }
             .code { 
-              font-size: 16px; 
+              font-size: ${codeFont}px; 
               font-weight: 900; 
               letter-spacing: 1.5px; 
               color: #000; 
@@ -105,20 +174,20 @@ export default function DeviceQrModal({ product, onClose }) {
               font-family: 'Courier New', Courier, monospace;
             }
             .name {
-              font-size: 12px;
+              font-size: ${nameFont}px;
               font-weight: bold;
               color: #222;
-              margin: 4px 0 6px;
+              margin: 3px 0 5px;
               line-height: 1.3;
             }
             .info-table {
               width: 100%;
               border-top: 1px dashed #aaa;
-              margin-top: 6px;
-              padding-top: 6px;
+              margin-top: 5px;
+              padding-top: 5px;
               text-align: left;
-              font-size: 11px;
-              line-height: 1.5;
+              font-size: ${infoFont}px;
+              line-height: 1.45;
             }
             .info-row {
               display: flex;
@@ -135,12 +204,12 @@ export default function DeviceQrModal({ product, onClose }) {
               text-align: right;
             }
             .url {
-              font-size: 8.5px;
+              font-size: 8px;
               color: #666;
-              margin-top: 8px;
+              margin-top: 6px;
               word-break: break-all;
               border-top: 1px solid #eee;
-              padding-top: 4px;
+              padding-top: 3px;
             }
           </style>
         </head>
@@ -183,12 +252,13 @@ export default function DeviceQrModal({ product, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-150">
-        <div className="px-5 py-3.5 border-b border-slate-800 flex items-center justify-between">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-xs">
+      <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-150 flex flex-col max-h-[92vh]">
+        {/* Header Modal */}
+        <div className="px-5 py-3.5 border-b border-slate-800 flex items-center justify-between shrink-0 bg-slate-900/90">
           <h3 className="font-bold text-sm text-white flex items-center gap-2">
             <QrCode className="w-4 h-4 text-blue-400" />
-            Mã QR Định Danh Thiết Bị
+            Tem & Mã QR Định Danh Thiết Bị
           </h3>
           <button
             onClick={onClose}
@@ -198,14 +268,75 @@ export default function DeviceQrModal({ product, onClose }) {
           </button>
         </div>
 
-        <div className="p-6 text-center space-y-4">
-          {/* Vùng hiển thị Canvas QR Code thế hệ mới, tự động lấy domain hiện tại */}
-          <div className="p-4 bg-white rounded-2xl shadow-inner border border-slate-300 inline-block">
+        {/* Nội dung Modal (Cuộn mượt) */}
+        <div className="p-5 text-center space-y-4 overflow-y-auto flex-1">
+          {/* ================= CHỌN KÍCH THƯỚC IN TEM ================= */}
+          <div className="bg-slate-950/80 p-3 rounded-xl border border-slate-800 text-left space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
+                <Sliders className="w-3.5 h-3.5 text-blue-400" />
+                Chọn kích thước tem in & mã QR:
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsCustomMode(!isCustomMode)}
+                className="text-[11px] text-blue-400 hover:text-blue-300 hover:underline cursor-pointer"
+              >
+                {isCustomMode ? "Dùng mẫu chuẩn" : "Tùy chỉnh chi tiết"}
+              </button>
+            </div>
+
+            {/* Các kích thước tiêu chuẩn (Presets) */}
+            {!isCustomMode ? (
+              <div className="grid grid-cols-4 gap-1.5">
+                {SIZE_PRESETS.map((preset) => (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    onClick={() => setSelectedSizeId(preset.id)}
+                    className={`p-2 rounded-lg border text-center transition cursor-pointer ${
+                      selectedSizeId === preset.id
+                        ? "bg-blue-600 border-blue-500 text-white font-bold shadow-md shadow-blue-600/30"
+                        : "bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white"
+                    }`}
+                  >
+                    <div className="text-xs">{preset.label}</div>
+                    <div className="text-[10px] opacity-75">{preset.sub}</div>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              /* Thanh trượt tùy chỉnh kích thước */
+              <div className="space-y-1.5 pt-1">
+                <div className="flex items-center justify-between text-xs text-slate-300">
+                  <span>Kích thước mã QR:</span>
+                  <span className="font-mono font-bold text-blue-400">{customQrSize} px (~{Math.round(customQrSize * 0.32)} mm)</span>
+                </div>
+                <input
+                  type="range"
+                  min="120"
+                  max="320"
+                  step="10"
+                  value={customQrSize}
+                  onChange={(e) => setCustomQrSize(Number(e.target.value))}
+                  className="w-full accent-blue-500 cursor-pointer"
+                />
+                <div className="flex justify-between text-[10px] text-slate-500 font-mono">
+                  <span>120px (Nhỏ)</span>
+                  <span>200px (Chuẩn)</span>
+                  <span>320px (Rất lớn)</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Vùng hiển thị Canvas QR Code thế hệ mới, thay đổi kích thước linh hoạt */}
+          <div className="p-4 bg-white rounded-2xl shadow-inner border border-slate-300 inline-block transition-all duration-150">
             <QRCodeCanvas
               id="device-qr-canvas"
               ref={canvasRef}
               value={scanUrl}
-              size={210}
+              size={activeQrSize}
               level="H"
               marginSize={2}
               className="mx-auto rounded-lg"
@@ -242,6 +373,7 @@ export default function DeviceQrModal({ product, onClose }) {
             </div>
           </div>
 
+          {/* Thông tin thiết bị tóm tắt */}
           <div className="text-left bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs space-y-1.5">
             <p className="font-bold text-white text-sm">{product.name}</p>
             <p className="text-slate-400">
@@ -272,25 +404,26 @@ export default function DeviceQrModal({ product, onClose }) {
               </p>
             )}
           </div>
+        </div>
 
-          <div className="grid grid-cols-2 gap-2 pt-2">
-            <button
-              type="button"
-              onClick={handlePrintLabel}
-              className="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl shadow-md transition cursor-pointer"
-            >
-              <Printer className="w-4 h-4" />
-              In tem dán
-            </button>
-            <button
-              type="button"
-              onClick={handleDownloadQR}
-              className="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition cursor-pointer"
-            >
-              <Download className="w-4 h-4" />
-              Tải ảnh PNG
-            </button>
-          </div>
+        {/* Footer Actions */}
+        <div className="p-4 border-t border-slate-800 bg-slate-900/90 shrink-0 grid grid-cols-2 gap-2.5">
+          <button
+            type="button"
+            onClick={handlePrintLabel}
+            className="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl shadow-md transition cursor-pointer"
+          >
+            <Printer className="w-4 h-4" />
+            In tem ({isCustomMode ? `${customQrSize}px` : currentPreset.label})
+          </button>
+          <button
+            type="button"
+            onClick={handleDownloadQR}
+            className="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl border border-slate-700 transition cursor-pointer"
+          >
+            <Download className="w-4 h-4" />
+            Tải ảnh PNG
+          </button>
         </div>
       </div>
     </div>
