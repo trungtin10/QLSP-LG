@@ -59,36 +59,41 @@ export default function DeviceQrModal({ product, onClose }) {
           <title>Tem QR - ${product.code}</title>
           <style>
             @media print {
-              @page { margin: 5mm; size: auto; }
+              @page { margin: 4mm; size: auto; }
               body { margin: 0; padding: 0; }
             }
             body { 
-              font-family: 'Segoe UI', Arial, sans-serif; 
+              font-family: 'Segoe UI', Arial, Helvetica, sans-serif; 
               margin: 0; 
               padding: 10px; 
               text-align: center; 
               background: #fff;
+              color: #000;
             }
             .label-box { 
-              width: 240px; 
+              width: 250px; 
               border: 2px dashed #000; 
               padding: 12px; 
               border-radius: 8px; 
               margin: 0 auto; 
               box-sizing: border-box; 
               text-align: center; 
+              background: #fff;
             }
             .header {
               font-size: 11px;
-              font-weight: bold;
+              font-weight: 800;
               text-transform: uppercase;
-              color: #333;
+              color: #111;
               margin-bottom: 6px;
+              letter-spacing: 0.5px;
+              border-bottom: 1px solid #ddd;
+              padding-bottom: 4px;
             }
             .qr-img { 
-              width: 190px; 
-              height: 190px; 
-              margin: 0 auto; 
+              width: 170px; 
+              height: 170px; 
+              margin: 0 auto 6px; 
               display: block; 
             }
             .code { 
@@ -96,32 +101,73 @@ export default function DeviceQrModal({ product, onClose }) {
               font-weight: 900; 
               letter-spacing: 1.5px; 
               color: #000; 
-              margin-top: 6px; 
               text-transform: uppercase; 
-              font-family: monospace;
+              font-family: 'Courier New', Courier, monospace;
             }
             .name {
+              font-size: 12px;
+              font-weight: bold;
+              color: #222;
+              margin: 4px 0 6px;
+              line-height: 1.3;
+            }
+            .info-table {
+              width: 100%;
+              border-top: 1px dashed #aaa;
+              margin-top: 6px;
+              padding-top: 6px;
+              text-align: left;
               font-size: 11px;
-              color: #444;
-              margin-top: 4px;
-              white-space: nowrap;
-              overflow: hidden;
-              text-overflow: ellipsis;
+              line-height: 1.5;
+            }
+            .info-row {
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 2px;
+            }
+            .info-label {
+              color: #555;
+              font-weight: normal;
+            }
+            .info-val {
+              color: #000;
+              font-weight: 700;
+              text-align: right;
             }
             .url {
-              font-size: 9px;
+              font-size: 8.5px;
               color: #666;
-              margin-top: 4px;
+              margin-top: 8px;
               word-break: break-all;
+              border-top: 1px solid #eee;
+              padding-top: 4px;
             }
           </style>
         </head>
         <body>
           <div class="label-box">
-            <div class="header">QUẢN LÝ THIẾT BỊ GPLX</div>
+            <div class="header">HỆ THỐNG QUẢN LÝ THIẾT BỊ GPLX</div>
             <img class="qr-img" src="${qrImage}" alt="${product.code}" />
             <div class="code">${product.code}</div>
             <div class="name">${product.name}</div>
+            <div class="info-table">
+              <div class="info-row">
+                <span class="info-label">Vị trí:</span>
+                <span class="info-val">${product.department || "—"}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Người quản lý:</span>
+                <span class="info-val">${product.manager || "Ban Quản Lý"}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Số lượng:</span>
+                <span class="info-val">${product.quantity || 1}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">SĐT liên hệ:</span>
+                <span class="info-val">${product.managerPhone || "—"}</span>
+              </div>
+            </div>
             <div class="url">${scanUrl}</div>
           </div>
           <script>
@@ -204,6 +250,17 @@ export default function DeviceQrModal({ product, onClose }) {
             <p className="text-slate-400">
               Phòng ban / Vị trí: <strong className="text-blue-400">{product.department}</strong>
             </p>
+            <p className="text-slate-400">
+              Người quản lý: <strong className="text-slate-200">{product.manager || "Ban Quản Lý"}</strong>
+            </p>
+            <p className="text-slate-400">
+              Số lượng: <strong className="text-white font-semibold">{product.quantity || 1}</strong>
+            </p>
+            {product.managerPhone && (
+              <p className="text-slate-400">
+                SĐT liên hệ: <strong className="text-emerald-400 font-mono">{product.managerPhone}</strong>
+              </p>
+            )}
             {product.assignedVehicle && (
               <p className="text-slate-400">
                 Biển số xe: <strong className="text-amber-400 font-mono">{product.assignedVehicle}</strong>

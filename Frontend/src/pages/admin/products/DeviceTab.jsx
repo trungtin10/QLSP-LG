@@ -329,6 +329,12 @@ export default function DeviceTab({
                           <Building2 className="w-3 h-3 text-slate-400" />
                           {p.department}
                         </span>
+                        {(p.manager || p.managerPhone) && (
+                          <p className="text-[10px] text-slate-400 mt-1 flex items-center gap-1 truncate max-w-[180px]">
+                            <span className="text-slate-300 font-medium truncate">{p.manager || "Ban Quản Lý"}</span>
+                            {p.managerPhone && <span className="text-emerald-400 font-mono shrink-0">({p.managerPhone})</span>}
+                          </p>
+                        )}
                       </td>
                       <td className="py-3 px-3 text-center font-bold text-white">
                         {p.quantity || 1}

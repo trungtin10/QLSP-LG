@@ -93,7 +93,7 @@ export default function ScanAssetPage() {
         <div className="text-center space-y-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-950/80 text-blue-400 border border-blue-800 text-xs font-semibold">
             <ShieldCheck className="w-3.5 h-3.5" />
-            HỆ THỐNG KIỂM TRA TÀI SẢN GPLX
+            HỆ THỐNG QUẢN LÝ THIẾT BỊ GPLX
           </div>
           <h1 className="text-2xl font-black tracking-tight text-white">
             {product.name}
