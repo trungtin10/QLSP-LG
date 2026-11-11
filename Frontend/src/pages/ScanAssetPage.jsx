@@ -132,16 +132,7 @@ export default function ScanAssetPage() {
             </div>
             <div className="flex-1">
               <p className="text-[11px] text-slate-400">Người chịu trách nhiệm</p>
-              <p className="text-sm font-bold text-white">{product.manager}</p>
-              {product.managerPhone && (
-                <a
-                  href={`tel:${product.managerPhone}`}
-                  className="inline-flex items-center gap-1 text-xs text-blue-400 hover:underline mt-0.5"
-                >
-                  <Phone className="w-3 h-3" />
-                  Gọi: {product.managerPhone}
-                </a>
-              )}
+              <p className="text-sm font-bold text-white">{product.manager || "Ban Quản Lý"}</p>
             </div>
           </div>
 
@@ -179,7 +170,18 @@ export default function ScanAssetPage() {
             </div>
             <div>
               <span className="text-slate-400 block text-[11px]">Số lượng:</span>
-              <span className="font-bold text-blue-400">{product.quantity || 1} cái/bộ</span>
+              <p className="font-bold text-blue-400">{product.quantity || 1} cái/bộ</p>
+              {product.managerPhone && (
+                <div className="mt-1">
+                  <a
+                    href={`tel:${product.managerPhone}`}
+                    className="inline-flex items-center gap-1 text-xs text-blue-400 hover:underline"
+                  >
+                    <Phone className="w-3 h-3 text-blue-400 shrink-0" />
+                    SDT: {product.managerPhone}
+                  </a>
+                </div>
+              )}
             </div>
             {product.serialNumber && (
               <div className="col-span-2">

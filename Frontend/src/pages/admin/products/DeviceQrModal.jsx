@@ -164,7 +164,7 @@ export default function DeviceQrModal({ product, onClose }) {
                 <span class="info-val">${product.quantity || 1}</span>
               </div>
               <div class="info-row">
-                <span class="info-label">SĐT liên hệ:</span>
+                <span class="info-label">SDT:</span>
                 <span class="info-val">${product.managerPhone || "—"}</span>
               </div>
             </div>
@@ -258,7 +258,7 @@ export default function DeviceQrModal({ product, onClose }) {
             </p>
             {product.managerPhone && (
               <p className="text-slate-400">
-                SĐT liên hệ: <strong className="text-emerald-400 font-mono">{product.managerPhone}</strong>
+                SDT: <strong className="text-emerald-400 font-mono">{product.managerPhone}</strong>
               </p>
             )}
             {product.assignedVehicle && (
