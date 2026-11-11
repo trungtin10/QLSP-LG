@@ -2,9 +2,15 @@ import QRCode from "qrcode";
 import Product, { DEPARTMENTS } from "../models/Product.js";
 
 // Hàm helper sinh mã QR Code (chứa link tra cứu hoặc thông tin tóm tắt)
-const generateProductQRCode = async (product) => {
+const generateProductQRCode = async (product, req = null) => {
     try {
-        const clientHost = process.env.CLIENT_URL || "http://localhost:5173";
+        let clientHost = process.env.CLIENT_URL;
+        if (!clientHost && req) {
+            clientHost = `${req.protocol}://${req.get("host")}`;
+        }
+        if (!clientHost) {
+            clientHost = `http://localhost:${process.env.PORT || 5001}`;
+        }
         const scanUrl = `${clientHost}/scan/${encodeURIComponent(product.code)}`;
         
         // Tạo DataURL hình ảnh base64 QR Code sắc nét
@@ -196,7 +202,7 @@ export const createProduct = async (req, res) => {
         });
 
         // Tự động tạo mã QR Code
-        newProduct.qrCode = await generateProductQRCode(newProduct);
+        newProduct.qrCode = await generateProductQRCode(newProduct, req);
 
         // Lưu vào MongoDB
         const savedProduct = await newProduct.save();
@@ -267,7 +273,7 @@ export const updateProduct = async (req, res) => {
         if (note !== undefined) product.note = note.trim();
 
         // Tái tạo lại mã QR nếu có thay đổi thông tin định danh
-        product.qrCode = await generateProductQRCode(product);
+        product.qrCode = await generateProductQRCode(product, req);
 
         const updated = await product.save();
 

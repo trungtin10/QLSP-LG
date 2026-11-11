@@ -1,0 +1,26 @@
+{
+  "name": "websitegplx",
+  "version": "1.0.0",
+  "description": "��#\u0000 \u0000Q\u0000L\u0000S\u0000P\u0000-\u0000L\u0000G\u0000\r\u0000 \u0000#\u0000 \u0000Q\u0000L\u0000S\u0000P\u0000-\u0000L\u0000G\u0000\r\u0000 \u0000",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm run build --prefix Frontend",
+    "start": "node Backend/src/server.js",
+    "prod": "npm run build --prefix Frontend && node Backend/src/server.js",
+    "dev:backend": "npm run dev --prefix Backend",
+    "dev:frontend": "npm run dev --prefix Frontend",
+    "install:all": "npm install --prefix Backend && npm install --prefix Frontend"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/trungtin10/QLSP-LG.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/trungtin10/QLSP-LG/issues"
+  },
+  "homepage": "https://github.com/trungtin10/QLSP-LG#readme"
+}

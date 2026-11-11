@@ -1,6 +1,10 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+import fs from "fs";
+
 import { connectDB } from "./config/db.js";
 import taskRoute from "./routes/tasksRouters.js";
 import authRoute from "./routes/authRoutes.js";
@@ -9,13 +13,27 @@ import userRoute from "./routes/userRoutes.js";
 import departmentRoute from "./routes/departmentRoutes.js";
 import categoryRoute from "./routes/categoryRoutes.js";
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const currentDir = path.dirname(__filename);
+
+// Tự động nạp file .env từ Backend/.env hoặc thư mục gốc
+const backendEnvPath = path.resolve(currentDir, "../.env");
+if (fs.existsSync(backendEnvPath)) {
+    dotenv.config({ path: backendEnvPath });
+} else {
+    dotenv.config();
+}
+// Đường dẫn tuyệt đối đến thư mục Frontend/dist
+const frontendDistPath = path.resolve(currentDir, "../../Frontend/dist");
 
 const PORT = process.env.PORT || 5001;
 const app = express();
 
-// Middleware CORS cho phép Frontend truy cập
-app.use(cors());
+// Cho phép CORS khi chạy dev frontend riêng (port 5173) hoặc từ mọi origin
+app.use(cors({
+    origin: true,
+    credentials: true,
+}));
 
 // Middleware đọc dữ liệu JSON gửi lên từ client (req.body)
 app.use(express.json());
@@ -23,7 +41,7 @@ app.use(express.json());
 // Kết nối cơ sở dữ liệu MongoDB
 connectDB();
 
-// Định tuyến API
+// ================= CÁC API ENDPOINTS =================
 app.use("/api/auth", authRoute);
 app.use("/api/tasks", taskRoute); 
 app.use("/api/products", productRoute);
@@ -31,10 +49,32 @@ app.use("/api/users", userRoute);
 app.use("/api/departments", departmentRoute);
 app.use("/api/categories", categoryRoute);
 
-// Route mặc định kiểm tra server
-app.get("/", (req, res) => {
-    res.json({ message: "API GPLX Backend is running!" });
+// Endpoint kiểm tra trạng thái API
+app.get("/api/health", (req, res) => {
+    res.json({ status: "ok", message: "API GPLX Backend is running!" });
 });
+
+// ================= PHỤC VỤ FRONTEND CHẠY CHUNG MỘT PORT =================
+if (fs.existsSync(frontendDistPath)) {
+    console.log(`[Production] Phục vụ Frontend tĩnh từ: ${frontendDistPath}`);
+    app.use(express.static(frontendDistPath));
+
+    // Mọi route client không phải /api thì trả về index.html (SPA routing cho React Router)
+    app.get("*", (req, res, next) => {
+        if (req.path.startsWith("/api")) {
+            return next();
+        }
+        res.sendFile(path.join(frontendDistPath, "index.html"));
+    });
+} else {
+    console.warn(`[Warning] Thư mục Frontend/dist chưa được tạo. Hãy chạy 'npm run build' trong Frontend.`);
+    app.get("/", (req, res) => {
+        res.json({
+            message: "API GPLX Backend is running!",
+            note: "Frontend build không tìm thấy tại Frontend/dist. Vui lòng chạy 'npm run build' để đóng gói giao diện."
+        });
+    });
+}
 
 // Middleware xử lý lỗi tập trung
 app.use((err, req, res, next) => {
@@ -43,5 +83,8 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`=================================================`);
+    console.log(`🚀 GPLX System đang chạy tại: http://localhost:${PORT}`);
+    console.log(`📦 Chế độ: ${fs.existsSync(frontendDistPath) ? "Chung 1 môi trường (Frontend + Backend)" : "Chỉ Backend API"}`);
+    console.log(`=================================================`);
 });
