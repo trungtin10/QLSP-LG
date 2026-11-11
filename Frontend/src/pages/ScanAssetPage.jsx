@@ -162,41 +162,55 @@ export default function ScanAssetPage() {
             </div>
           )}
 
-          {/* Phân loại, Số lượng, Serial */}
+          {/* Phân loại, Số lượng, Ngày bàn giao, SDT liên hệ */}
           <div className="grid grid-cols-2 gap-3 pt-3 border-t border-slate-800 text-xs">
+            {/* Hàng 1 - Cột Trái: Phân loại */}
             <div>
               <span className="text-slate-400 block text-[11px]">Phân loại:</span>
               <span className="font-semibold text-white">{product.category || "Thiết bị"}</span>
             </div>
+
+            {/* Hàng 1 - Cột Phải: Số lượng */}
             <div>
               <span className="text-slate-400 block text-[11px]">Số lượng:</span>
               <p className="font-bold text-blue-400">{product.quantity || 1} cái/bộ</p>
-              {product.managerPhone && (
-                <div className="mt-1">
-                  <a
-                    href={`tel:${product.managerPhone}`}
-                    className="inline-flex items-center gap-1 text-xs text-blue-400 hover:underline"
-                  >
-                    <Phone className="w-3 h-3 text-blue-400 shrink-0" />
-                    SDT: {product.managerPhone}
-                  </a>
-                </div>
-              )}
             </div>
-            {product.serialNumber && (
-              <div className="col-span-2">
-                <span className="text-slate-400 block text-[11px]">Số Serial / IMEI:</span>
-                <span className="font-mono text-slate-200">{product.serialNumber}</span>
-              </div>
-            )}
+
+            {/* Hàng 2 - Cột Trái: Ngày bàn giao */}
             <div>
               <span className="text-slate-400 block text-[11px]">Ngày bàn giao:</span>
               <span className="font-semibold text-white">
                 {product.purchaseDate ? new Date(product.purchaseDate).toLocaleDateString("vi-VN") : "Chưa rõ"}
               </span>
             </div>
+
+            {/* Hàng 2 - Cột Phải: SDT liên hệ (nằm ngang bằng chính xác với Ngày bàn giao) */}
+            <div>
+              <span className="text-slate-400 block text-[11px]">Liên hệ:</span>
+              {product.managerPhone ? (
+                <a
+                  href={`tel:${product.managerPhone}`}
+                  className="inline-flex items-center gap-1 text-xs font-bold text-blue-400 hover:underline mt-0.5"
+                >
+                  <Phone className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                  SDT: {product.managerPhone}
+                </a>
+              ) : (
+                <span className="text-slate-500 font-semibold">—</span>
+              )}
+            </div>
+
+            {/* Số Serial / IMEI */}
+            {product.serialNumber && (
+              <div className="col-span-2">
+                <span className="text-slate-400 block text-[11px]">Số Serial / IMEI:</span>
+                <span className="font-mono text-slate-200">{product.serialNumber}</span>
+              </div>
+            )}
+
+            {/* Hạn bảo hành / kiểm định */}
             {product.warrantyExpiry && (
-              <div>
+              <div className="col-span-2">
                 <span className="text-slate-400 block text-[11px]">Hạn kiểm định / bảo hành:</span>
                 <span className="font-semibold text-amber-300">
                   {new Date(product.warrantyExpiry).toLocaleDateString("vi-VN")}
