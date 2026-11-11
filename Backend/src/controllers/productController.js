@@ -1,16 +1,36 @@
 import QRCode from "qrcode";
 import Product, { DEPARTMENTS } from "../models/Product.js";
 
+// Hàm helper xác định chính xác domain của hệ thống đang chạy
+export const getClientHost = (req = null) => {
+    // 1. Biến môi trường do Render tự động cấp (ví dụ: https://qlsp-lg.onrender.com)
+    if (process.env.RENDER_EXTERNAL_URL) {
+        return process.env.RENDER_EXTERNAL_URL.replace(/\/$/, "");
+    }
+    // 2. Biến CLIENT_URL nếu được set thủ công và không phải localhost
+    if (process.env.CLIENT_URL && !process.env.CLIENT_URL.includes("localhost")) {
+        return process.env.CLIENT_URL.replace(/\/$/, "");
+    }
+    // 3. Nhận diện từ Header request client gửi lên
+    if (req) {
+        const proto = req.headers["x-forwarded-proto"] || req.protocol || "https";
+        const host = req.get("host");
+        if (host && !host.includes("localhost")) {
+            return `${proto}://${host}`;
+        }
+    }
+    // 4. Nếu có CLIENT_URL bất kỳ
+    if (process.env.CLIENT_URL) {
+        return process.env.CLIENT_URL.replace(/\/$/, "");
+    }
+    // 5. Fallback khi dev local
+    return req ? `${req.protocol}://${req.get("host")}` : `http://localhost:${process.env.PORT || 5001}`;
+};
+
 // Hàm helper sinh mã QR Code (chứa link tra cứu hoặc thông tin tóm tắt)
-const generateProductQRCode = async (product, req = null) => {
+export const generateProductQRCode = async (product, req = null) => {
     try {
-        let clientHost = process.env.CLIENT_URL;
-        if (!clientHost && req) {
-            clientHost = `${req.protocol}://${req.get("host")}`;
-        }
-        if (!clientHost) {
-            clientHost = `http://localhost:${process.env.PORT || 5001}`;
-        }
+        const clientHost = getClientHost(req);
         const scanUrl = `${clientHost}/scan/${encodeURIComponent(product.code)}`;
         
         // Tạo DataURL hình ảnh base64 QR Code sắc nét
@@ -27,6 +47,31 @@ const generateProductQRCode = async (product, req = null) => {
     } catch (err) {
         console.error("Lỗi sinh mã QR:", err);
         return "";
+    }
+};
+
+// Đồng bộ / Làm mới toàn bộ mã QR của các thiết bị theo domain hiện tại
+export const syncAllProductQRCodes = async (req, res) => {
+    try {
+        const clientHost = getClientHost(req);
+        const products = await Product.find({});
+        let updatedCount = 0;
+
+        for (const p of products) {
+            p.qrCode = await generateProductQRCode(p, req);
+            await p.save();
+            updatedCount++;
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `Đã làm mới mã QR cho ${updatedCount} thiết bị theo địa chỉ: ${clientHost}`,
+            clientHost,
+            updatedCount,
+        });
+    } catch (err) {
+        console.error("Lỗi đồng bộ mã QR:", err);
+        res.status(500).json({ message: "Lỗi máy chủ khi làm mới mã QR!" });
     }
 };
 

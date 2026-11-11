@@ -1,26 +1,62 @@
-import { QrCode, X, Printer, Download } from "lucide-react";
+import { useState, useRef } from "react";
+import { QrCode, X, Printer, Download, Copy, ExternalLink, Check } from "lucide-react";
+import { QRCodeCanvas } from "qrcode.react";
 import { toast } from "sonner";
 
 export default function DeviceQrModal({ product, onClose }) {
+  const [copied, setCopied] = useState(false);
+  const canvasRef = useRef(null);
+
   if (!product) return null;
 
+  // Luôn lấy URL tra cứu theo domain hiện tại của trình duyệt (ví dụ: https://qlsp-lg.onrender.com/scan/TB-001)
+  const scanUrl = `${window.location.origin}/scan/${encodeURIComponent(product.code)}`;
+
+  const handleCopyUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(scanUrl);
+      setCopied(true);
+      toast.success("Đã sao chép link tra cứu sản phẩm!");
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      toast.error("Không thể sao chép liên kết!");
+    }
+  };
+
+  const getQrDataUrl = () => {
+    const canvas = document.getElementById("device-qr-canvas");
+    if (canvas) {
+      return canvas.toDataURL("image/png");
+    }
+    return product.qrCode || "";
+  };
+
   const handleDownloadQR = () => {
-    if (!product.qrCode) return;
+    const qrImage = getQrDataUrl();
+    if (!qrImage) {
+      toast.error("Không thể tạo ảnh QR để tải về!");
+      return;
+    }
     const link = document.createElement("a");
-    link.href = product.qrCode;
-    link.download = `QR_${product.code}_${product.name}.png`;
+    link.href = qrImage;
+    link.download = `QR_${product.code}_${product.name.replace(/\s+/g, "_")}.png`;
     link.click();
     toast.success(`Đã tải xuống mã QR của [${product.code}]`);
   };
 
   const handlePrintLabel = () => {
+    const qrImage = getQrDataUrl();
     const printWindow = window.open("", "_blank");
-    if (!printWindow) return;
+    if (!printWindow) {
+      toast.warning("Vui lòng cho phép mở cửa sổ popup để in tem dán!");
+      return;
+    }
 
     printWindow.document.write(`
+      <!DOCTYPE html>
       <html>
         <head>
-          <title>QR Code - ${product.code}</title>
+          <title>Tem QR - ${product.code}</title>
           <style>
             @media print {
               @page { margin: 5mm; size: auto; }
@@ -34,13 +70,20 @@ export default function DeviceQrModal({ product, onClose }) {
               background: #fff;
             }
             .label-box { 
-              width: 220px; 
+              width: 240px; 
               border: 2px dashed #000; 
               padding: 12px; 
               border-radius: 8px; 
               margin: 0 auto; 
               box-sizing: border-box; 
               text-align: center; 
+            }
+            .header {
+              font-size: 11px;
+              font-weight: bold;
+              text-transform: uppercase;
+              color: #333;
+              margin-bottom: 6px;
             }
             .qr-img { 
               width: 190px; 
@@ -49,20 +92,37 @@ export default function DeviceQrModal({ product, onClose }) {
               display: block; 
             }
             .code { 
-              font-size: 18px; 
+              font-size: 16px; 
               font-weight: 900; 
-              letter-spacing: 2px; 
+              letter-spacing: 1.5px; 
               color: #000; 
-              margin-top: 8px; 
+              margin-top: 6px; 
               text-transform: uppercase; 
               font-family: monospace;
+            }
+            .name {
+              font-size: 11px;
+              color: #444;
+              margin-top: 4px;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+            .url {
+              font-size: 9px;
+              color: #666;
+              margin-top: 4px;
+              word-break: break-all;
             }
           </style>
         </head>
         <body>
           <div class="label-box">
-            <img class="qr-img" src="${product.qrCode}" alt="${product.code}" />
+            <div class="header">QUẢN LÝ THIẾT BỊ GPLX</div>
+            <img class="qr-img" src="${qrImage}" alt="${product.code}" />
             <div class="code">${product.code}</div>
+            <div class="name">${product.name}</div>
+            <div class="url">${scanUrl}</div>
           </div>
           <script>
             window.onload = function() { 
@@ -93,15 +153,47 @@ export default function DeviceQrModal({ product, onClose }) {
         </div>
 
         <div className="p-6 text-center space-y-4">
+          {/* Vùng hiển thị Canvas QR Code thế hệ mới, tự động lấy domain hiện tại */}
           <div className="p-4 bg-white rounded-2xl shadow-inner border border-slate-300 inline-block">
-            <img
-              src={product.qrCode}
-              alt={product.code}
-              className="w-56 h-56 mx-auto rounded-lg"
+            <QRCodeCanvas
+              id="device-qr-canvas"
+              ref={canvasRef}
+              value={scanUrl}
+              size={210}
+              level="H"
+              marginSize={2}
+              className="mx-auto rounded-lg"
             />
             <p className="mt-2 text-xs font-mono font-black text-slate-900 tracking-wider">
               {product.code}
             </p>
+          </div>
+
+          {/* Link tra cứu trực tiếp */}
+          <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-center justify-between gap-2 text-left">
+            <div className="truncate flex-1">
+              <p className="text-[10px] text-slate-400 uppercase font-semibold">Link quét tra cứu:</p>
+              <p className="text-xs font-mono text-blue-400 truncate">{scanUrl}</p>
+            </div>
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                type="button"
+                onClick={handleCopyUrl}
+                title="Sao chép link"
+                className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition cursor-pointer"
+              >
+                {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              </button>
+              <a
+                href={scanUrl}
+                target="_blank"
+                rel="noreferrer"
+                title="Mở thử link này"
+                className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
           </div>
 
           <div className="text-left bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs space-y-1.5">

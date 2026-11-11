@@ -13,6 +13,12 @@ export const productService = {
     return response.data;
   },
 
+  // Đồng bộ / Làm mới mã QR của toàn bộ thiết bị theo domain hiện tại
+  syncQRCodes: async () => {
+    const response = await api.post("/products/sync-qr");
+    return response.data;
+  },
+
   // ================= PHÒNG BAN & VỊ TRÍ CRUD =================
   getDepartments: async () => {
     const response = await api.get("/departments");

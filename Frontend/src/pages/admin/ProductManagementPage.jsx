@@ -254,6 +254,7 @@ export default function ProductManagementPage() {
           onOpenEdit={handleOpenEdit}
           onDelete={handleDeleteProduct}
           onOpenQrModal={setQrModalProduct}
+          onRefresh={fetchProducts}
         />
       )}
 

@@ -29,6 +29,9 @@ const frontendDistPath = path.resolve(currentDir, "../../Frontend/dist");
 const PORT = process.env.PORT || 5001;
 const app = express();
 
+// Cho phép Express tin cậy reverse proxy của Render để lấy đúng https và domain
+app.set("trust proxy", 1);
+
 // Cho phép CORS khi chạy dev frontend riêng (port 5173) hoặc từ mọi origin
 app.use(cors({
     origin: true,

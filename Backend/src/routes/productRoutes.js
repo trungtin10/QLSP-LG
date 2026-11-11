@@ -6,6 +6,7 @@ import {
     createProduct,
     updateProduct,
     deleteProduct,
+    syncAllProductQRCodes,
 } from "../controllers/productController.js";
 import { protect, authorizeRoles } from "../middlewares/authMiddleware.js";
 
@@ -17,6 +18,9 @@ router.get("/scan/:code", getProductByCode);
 // Các route quản trị (yêu cầu đăng nhập)
 router.get("/", protect, getProducts);
 router.get("/departments", protect, getDepartmentsSummary);
+
+// Đồng bộ toàn bộ mã QR của sản phẩm theo domain hiện tại
+router.post("/sync-qr", protect, authorizeRoles("superadmin", "admin"), syncAllProductQRCodes);
 
 // Các quyền can thiệp dữ liệu: dành cho Superadmin (hoặc Admin nếu cần)
 router.post("/", protect, authorizeRoles("superadmin", "admin"), createProduct);
