@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Package, 
   FileSpreadsheet, 
@@ -11,7 +11,8 @@ import {
   Edit3, 
   Trash2,
   Wrench,
-  ArrowRightLeft 
+  ArrowRightLeft,
+  MoreVertical 
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
@@ -41,6 +42,18 @@ export default function DeviceTab({
   onRefresh,
 }) {
   const [selectedIds, setSelectedIds] = useState([]);
+  const [openActionId, setOpenActionId] = useState(null);
+
+  // Đóng dropdown thao tác khi click ra ngoài
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest(".action-menu-dropdown")) {
+        setOpenActionId(null);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
 
   // Chọn tất cả / Bỏ chọn
   const isAllSelected = products.length > 0 && selectedIds.length === products.length;
@@ -316,7 +329,7 @@ export default function DeviceTab({
                       </td>
                       <td className="py-3 px-3 text-center">
                         <span className="font-bold text-white text-xs block">
-                          {p.quantity || 1} cái/bộ
+                          {p.quantity || 1}
                         </span>
                         {p.quantityMaintenance > 0 && (
                           <span className="inline-block mt-0.5 text-[10px] text-amber-400 font-medium">
@@ -348,43 +361,96 @@ export default function DeviceTab({
                           />
                         </button>
                       </td>
-                      <td className="py-3 px-3 text-center">
-                        <div className="flex items-center justify-center gap-1">
+                      <td className="py-3 px-3 text-center relative action-menu-dropdown">
+                        <div className="inline-block">
                           <button
-                            onClick={() => onOpenMaintenance && onOpenMaintenance(p)}
-                            title="Quản lý bảo trì & sửa chữa"
-                            className="p-1.5 text-amber-400 hover:bg-amber-950/60 rounded-lg transition cursor-pointer"
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenActionId(openActionId === p._id ? null : p._id);
+                            }}
+                            title="Tùy chọn thao tác"
+                            className={`p-1.5 rounded-lg border transition cursor-pointer inline-flex items-center justify-center ${
+                              openActionId === p._id
+                                ? "bg-blue-600 text-white border-blue-500 shadow-md shadow-blue-600/30"
+                                : "text-slate-300 bg-slate-900 border-slate-700/80 hover:bg-slate-800 hover:text-white"
+                            }`}
                           >
-                            <Wrench className="w-4 h-4" />
+                            <MoreVertical className="w-4 h-4" />
                           </button>
-                          <button
-                            onClick={() => onOpenTransfer && onOpenTransfer(p)}
-                            title="Điều chuyển phòng ban / Xuất kho"
-                            className="p-1.5 text-cyan-400 hover:bg-cyan-950/60 rounded-lg transition cursor-pointer"
-                          >
-                            <ArrowRightLeft className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => onOpenQrModal(p)}
-                            title="Xem tem mã QR"
-                            className="p-1.5 text-blue-400 hover:bg-blue-950/60 rounded-lg transition cursor-pointer"
-                          >
-                            <QrCode className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => onOpenEdit(p)}
-                            title="Sửa thiết bị"
-                            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition cursor-pointer"
-                          >
-                            <Edit3 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => onDelete(p._id, p.name, p.code)}
-                            title="Xóa thiết bị"
-                            className="p-1.5 text-rose-400 hover:bg-rose-950/60 rounded-lg transition cursor-pointer"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+
+                          {/* Dropdown Menu */}
+                          {openActionId === p._id && (
+                            <div
+                              className={`absolute right-3 z-50 w-52 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl py-1 text-left animate-in fade-in zoom-in-95 duration-100 ${
+                                index >= products.length - 2 && products.length > 2
+                                  ? "bottom-full mb-1"
+                                  : "top-full mt-1"
+                              }`}
+                            >
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setOpenActionId(null);
+                                  if (onOpenMaintenance) onOpenMaintenance(p);
+                                }}
+                                className="w-full px-3 py-2 text-xs text-amber-300 hover:bg-amber-950/40 hover:text-amber-200 flex items-center gap-2.5 transition cursor-pointer"
+                              >
+                                <Wrench className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                                <span>Bảo trì & Sửa chữa</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setOpenActionId(null);
+                                  if (onOpenTransfer) onOpenTransfer(p);
+                                }}
+                                className="w-full px-3 py-2 text-xs text-cyan-300 hover:bg-cyan-950/40 hover:text-cyan-200 flex items-center gap-2.5 transition cursor-pointer"
+                              >
+                                <ArrowRightLeft className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                                <span>Điều chuyển phòng ban</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setOpenActionId(null);
+                                  onOpenQrModal(p);
+                                }}
+                                className="w-full px-3 py-2 text-xs text-blue-300 hover:bg-blue-950/40 hover:text-blue-200 flex items-center gap-2.5 transition cursor-pointer"
+                              >
+                                <QrCode className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                                <span>Xem & In tem mã QR</span>
+                              </button>
+
+                              <div className="my-1 border-t border-slate-800" />
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setOpenActionId(null);
+                                  onOpenEdit(p);
+                                }}
+                                className="w-full px-3 py-2 text-xs text-slate-300 hover:bg-slate-800 hover:text-white flex items-center gap-2.5 transition cursor-pointer"
+                              >
+                                <Edit3 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                <span>Chỉnh sửa thông tin</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setOpenActionId(null);
+                                  onDelete(p._id, p.name, p.code);
+                                }}
+                                className="w-full px-3 py-2 text-xs text-rose-400 hover:bg-rose-950/50 hover:text-rose-300 flex items-center gap-2.5 transition cursor-pointer"
+                              >
+                                <Trash2 className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                                <span>Xóa thiết bị</span>
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </td>
                     </tr>

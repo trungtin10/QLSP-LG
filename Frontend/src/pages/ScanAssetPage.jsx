@@ -173,7 +173,7 @@ export default function ScanAssetPage() {
             </div>
             <div>
               <span className="text-slate-400 block text-[11px]">Số lượng:</span>
-              <p className="font-bold text-blue-400">{product.quantity || 1} cái/bộ</p>
+              <p className="font-bold text-blue-400">{product.quantity || 1}</p>
               {product.quantityMaintenance > 0 && (
                 <p className="text-amber-400 font-medium text-[11px] mt-0.5">
                   🟡 Đang bảo trì: <strong className="text-white">{product.quantityMaintenance}</strong>
