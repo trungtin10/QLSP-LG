@@ -10,7 +10,6 @@ import {
   QrCode, 
   Edit3, 
   Trash2,
-  RefreshCw,
   Wrench,
   ArrowRightLeft 
 } from "lucide-react";
@@ -42,20 +41,6 @@ export default function DeviceTab({
   onRefresh,
 }) {
   const [selectedIds, setSelectedIds] = useState([]);
-  const [syncingQr, setSyncingQr] = useState(false);
-
-  const handleSyncQr = async () => {
-    try {
-      setSyncingQr(true);
-      const res = await productService.syncQRCodes();
-      toast.success(res.message || "Đã đồng bộ lại toàn bộ mã QR!");
-      if (onRefresh) onRefresh();
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Lỗi khi đồng bộ mã QR!");
-    } finally {
-      setSyncingQr(false);
-    }
-  };
 
   // Chọn tất cả / Bỏ chọn
   const isAllSelected = products.length > 0 && selectedIds.length === products.length;
@@ -155,17 +140,6 @@ export default function DeviceTab({
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
-          {/* NÚT ĐỒNG BỘ QR THEO DOMAIN */}
-          <button
-            onClick={handleSyncQr}
-            disabled={syncingQr}
-            className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 active:bg-slate-900 text-slate-200 text-xs sm:text-sm font-semibold rounded-xl border border-slate-700 shadow-md transition cursor-pointer disabled:opacity-50 shrink-0"
-            title="Đồng bộ lại toàn bộ mã QR của thiết bị theo địa chỉ trang web hiện tại"
-          >
-            <RefreshCw className={`w-4 h-4 text-blue-400 ${syncingQr ? "animate-spin" : ""}`} />
-            {syncingQr ? "Đang đồng bộ..." : "Đồng bộ QR Domain"}
-          </button>
-
           {/* NÚT XUẤT EXCEL CHUẨN XANH LÁ THEO ẢNH YÊU CẦU */}
           <button
             onClick={handleExportExcel}
