@@ -4,8 +4,8 @@
   "description": "Cổng thông tin và tra cứu trang thiết bị sát hạch, xe tập lái DAT trực tuyến",
   "icons": [
     {
-      "src": "/favicon.svg",
-      "type": "image/svg+xml",
+      "src": "/logottt.png",
+      "type": "image/png",
       "sizes": "192x192 512x512",
       "purpose": "any maskable"
     }
