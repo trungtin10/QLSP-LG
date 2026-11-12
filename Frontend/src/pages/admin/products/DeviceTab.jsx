@@ -10,7 +10,9 @@ import {
   QrCode, 
   Edit3, 
   Trash2,
-  RefreshCw 
+  RefreshCw,
+  Wrench,
+  ArrowRightLeft 
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
@@ -35,6 +37,8 @@ export default function DeviceTab({
   onOpenEdit,
   onDelete,
   onOpenQrModal,
+  onOpenMaintenance,
+  onOpenTransfer,
   onRefresh,
 }) {
   const [selectedIds, setSelectedIds] = useState([]);
@@ -336,8 +340,30 @@ export default function DeviceTab({
                           </p>
                         )}
                       </td>
-                      <td className="py-3 px-3 text-center font-bold text-white">
-                        {p.quantity || 1}
+                      <td className="py-3 px-3 text-center">
+                        <span className="font-bold text-white text-xs block">
+                          {p.quantity || 1} cái/bộ
+                        </span>
+                        <div className="flex flex-col items-center gap-0.5 mt-1 text-[10px]">
+                          <span className="text-emerald-400 font-medium">
+                            🟢 {p.quantityActive !== undefined ? p.quantityActive : (p.quantity || 1)} hoạt động
+                          </span>
+                          {p.quantityMaintenance > 0 && (
+                            <span className="text-amber-400 font-medium">
+                              🟡 {p.quantityMaintenance} bảo trì
+                            </span>
+                          )}
+                          {p.quantityStorage > 0 && (
+                            <span className="text-cyan-400 font-medium">
+                              🔵 {p.quantityStorage} trong kho
+                            </span>
+                          )}
+                          {p.quantityBroken > 0 && (
+                            <span className="text-rose-400 font-medium">
+                              🔴 {p.quantityBroken} hỏng
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="py-3 px-3">
                         <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${statusInfo.color}`}>
@@ -365,6 +391,20 @@ export default function DeviceTab({
                       </td>
                       <td className="py-3 px-3 text-center">
                         <div className="flex items-center justify-center gap-1">
+                          <button
+                            onClick={() => onOpenMaintenance && onOpenMaintenance(p)}
+                            title="Quản lý bảo trì & sửa chữa"
+                            className="p-1.5 text-amber-400 hover:bg-amber-950/60 rounded-lg transition cursor-pointer"
+                          >
+                            <Wrench className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => onOpenTransfer && onOpenTransfer(p)}
+                            title="Điều chuyển phòng ban / Xuất kho"
+                            className="p-1.5 text-cyan-400 hover:bg-cyan-950/60 rounded-lg transition cursor-pointer"
+                          >
+                            <ArrowRightLeft className="w-4 h-4" />
+                          </button>
                           <button
                             onClick={() => onOpenQrModal(p)}
                             title="Xem tem mã QR"

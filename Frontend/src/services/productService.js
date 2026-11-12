@@ -19,6 +19,18 @@ export const productService = {
     return response.data;
   },
 
+  // Thao tác gửi đi bảo dưỡng hoặc hoàn tất sửa chữa
+  maintenanceAction: async (id, data) => {
+    const response = await api.post(`/products/${id}/maintenance`, data);
+    return response.data;
+  },
+
+  // Thao tác điều chuyển thiết bị giữa các phòng ban / xuất kho
+  transferProduct: async (id, data) => {
+    const response = await api.post(`/products/${id}/transfer`, data);
+    return response.data;
+  },
+
   // ================= PHÒNG BAN & VỊ TRÍ CRUD =================
   getDepartments: async () => {
     const response = await api.get("/departments");

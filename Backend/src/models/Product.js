@@ -56,6 +56,40 @@ const productSchema = new mongoose.Schema(
             default: 1,
             min: 1,
         },
+        // Phân rã số lượng theo trạng thái thực tế
+        quantityActive: {
+            type: Number,
+            default: 1,
+            min: 0,
+        },
+        quantityMaintenance: {
+            type: Number,
+            default: 0,
+            min: 0,
+        },
+        quantityStorage: {
+            type: Number,
+            default: 0,
+            min: 0,
+        },
+        quantityBroken: {
+            type: Number,
+            default: 0,
+            min: 0,
+        },
+        // Nhật ký biến động (bảo trì, xuất kho, điều chuyển)
+        history: [
+            {
+                action: { type: String, required: true }, // "maintenance_start", "maintenance_end", "transfer", "update", "created"
+                title: { type: String, default: "" },
+                quantity: { type: Number, default: 1 },
+                fromDepartment: { type: String, default: "" },
+                toDepartment: { type: String, default: "" },
+                reason: { type: String, default: "" },
+                performedBy: { type: String, default: "Hệ thống" },
+                createdAt: { type: Date, default: Date.now },
+            }
+        ],
         assignedVehicle: {
             type: String,
             default: "",
@@ -102,6 +136,35 @@ const productSchema = new mongoose.Schema(
         timestamps: true,
     }
 );
+
+productSchema.pre("save", function () {
+    // Nếu tạo mới và chưa set quantityActive thì tự động chia theo status
+    if (this.isNew && (this.quantityActive === undefined || this.quantityActive === null)) {
+        const qty = Math.max(1, Number(this.quantity) || 1);
+        if (this.status === "Đang bảo trì") {
+            this.quantityMaintenance = qty;
+            this.quantityActive = 0;
+        } else if (this.status === "Dự phòng") {
+            this.quantityStorage = qty;
+            this.quantityActive = 0;
+        } else if (this.status === "Hỏng" || this.status === "Thanh lý") {
+            this.quantityBroken = qty;
+            this.quantityActive = 0;
+        } else {
+            this.quantityActive = qty;
+            this.quantityMaintenance = 0;
+        }
+    }
+
+    // Đảm bảo quantity luôn bằng tổng các thành phần
+    const totalBreakdown = (Number(this.quantityActive) || 0) + 
+                           (Number(this.quantityMaintenance) || 0) + 
+                           (Number(this.quantityStorage) || 0) + 
+                           (Number(this.quantityBroken) || 0);
+    if (totalBreakdown > 0) {
+        this.quantity = totalBreakdown;
+    }
+});
 
 const Product = mongoose.model("Product", productSchema);
 

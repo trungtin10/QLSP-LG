@@ -10,6 +10,8 @@ import DepartmentTab from "./products/DepartmentTab";
 import CategoryTab from "./products/CategoryTab";
 import DeviceFormModal from "./products/DeviceFormModal";
 import DeviceQrModal from "./products/DeviceQrModal";
+import MaintenanceModal from "./products/MaintenanceModal";
+import TransferModal from "./products/TransferModal";
 import { DEFAULT_DEPARTMENTS, DEFAULT_CATEGORIES } from "./products/constants";
 
 export default function ProductManagementPage() {
@@ -35,6 +37,8 @@ export default function ProductManagementPage() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [qrModalProduct, setQrModalProduct] = useState(null);
+  const [maintenanceProduct, setMaintenanceProduct] = useState(null);
+  const [transferProduct, setTransferProduct] = useState(null);
 
   // ================= LOAD DỮ LIỆU TỪ SERVER =================
   const fetchProducts = async () => {
@@ -254,6 +258,8 @@ export default function ProductManagementPage() {
           onOpenEdit={handleOpenEdit}
           onDelete={handleDeleteProduct}
           onOpenQrModal={setQrModalProduct}
+          onOpenMaintenance={setMaintenanceProduct}
+          onOpenTransfer={setTransferProduct}
           onRefresh={fetchProducts}
         />
       )}
@@ -303,6 +309,21 @@ export default function ProductManagementPage() {
       <DeviceQrModal
         product={qrModalProduct}
         onClose={() => setQrModalProduct(null)}
+      />
+
+      {/* ================= MODAL QUẢN LÝ BẢO TRÌ ================= */}
+      <MaintenanceModal
+        product={maintenanceProduct}
+        onClose={() => setMaintenanceProduct(null)}
+        onSuccess={() => fetchProducts()}
+      />
+
+      {/* ================= MODAL ĐIỀU CHUYỂN PHÒNG BAN ================= */}
+      <TransferModal
+        product={transferProduct}
+        departmentNames={departmentNames}
+        onClose={() => setTransferProduct(null)}
+        onSuccess={() => fetchProducts()}
       />
     </div>
   );

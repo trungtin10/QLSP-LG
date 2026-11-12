@@ -13,7 +13,10 @@ import {
   Loader2, 
   CheckCircle2, 
   ArrowLeft,
-  Car
+  Car,
+  History,
+  Wrench,
+  ArrowRightLeft
 } from "lucide-react";
 
 const STATUS_CONFIG = {
@@ -169,8 +172,28 @@ export default function ScanAssetPage() {
               <span className="font-semibold text-white">{product.category || "Thiết bị"}</span>
             </div>
             <div>
-              <span className="text-slate-400 block text-[11px]">Số lượng:</span>
-              <p className="font-bold text-blue-400">{product.quantity || 1} cái/bộ</p>
+              <span className="text-slate-400 block text-[11px]">Số lượng tổng:</span>
+              <p className="font-bold text-blue-400 text-sm">{product.quantity || 1} cái/bộ</p>
+              <div className="mt-1 space-y-0.5 text-[11px]">
+                <p className="text-emerald-400 font-medium">
+                  🟢 Hoạt động: <strong className="text-white">{product.quantityActive !== undefined ? product.quantityActive : (product.quantity || 1)}</strong>
+                </p>
+                {product.quantityMaintenance > 0 && (
+                  <p className="text-amber-400 font-medium">
+                    🟡 Đang bảo trì: <strong className="text-white">{product.quantityMaintenance}</strong>
+                  </p>
+                )}
+                {product.quantityStorage > 0 && (
+                  <p className="text-cyan-400 font-medium">
+                    🔵 Lưu kho: <strong className="text-white">{product.quantityStorage}</strong>
+                  </p>
+                )}
+                {product.quantityBroken > 0 && (
+                  <p className="text-rose-400 font-medium">
+                    🔴 Báo hỏng: <strong className="text-white">{product.quantityBroken}</strong>
+                  </p>
+                )}
+              </div>
             </div>
 
             {product.serialNumber && (
@@ -241,6 +264,51 @@ export default function ScanAssetPage() {
             </div>
           )}
         </div>
+
+        {/* Lịch sử hoạt động & luân chuyển */}
+        {product.history && product.history.length > 0 && (
+          <div className="bg-slate-900/90 rounded-2xl border border-slate-800 p-5 shadow-xl space-y-3">
+            <h3 className="font-bold text-xs text-white flex items-center gap-2">
+              <History className="w-4 h-4 text-blue-400" />
+              Lịch sử luân chuyển & bảo dưỡng ({product.history.length})
+            </h3>
+            <div className="space-y-2.5 max-h-60 overflow-y-auto pr-1">
+              {product.history.map((h, idx) => {
+                const isMaintenance = h.action?.startsWith("maintenance");
+                const isTransfer = h.action?.startsWith("transfer");
+                return (
+                  <div key={idx} className="p-3 bg-slate-950/70 rounded-xl border border-slate-800/80 text-xs space-y-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-slate-200 flex items-center gap-1.5">
+                        {isMaintenance ? (
+                          <Wrench className="w-3.5 h-3.5 text-amber-400" />
+                        ) : isTransfer ? (
+                          <ArrowRightLeft className="w-3.5 h-3.5 text-cyan-400" />
+                        ) : (
+                          <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" />
+                        )}
+                        {h.title}
+                      </span>
+                      <span className="text-[10px] text-slate-500 font-mono">
+                        {new Date(h.createdAt).toLocaleDateString("vi-VN")}
+                      </span>
+                    </div>
+                    {h.reason && (
+                      <p className="text-[11px] text-slate-400">
+                        Lý do / Nội dung: <span className="text-slate-300">{h.reason}</span>
+                      </p>
+                    )}
+                    {h.performedBy && (
+                      <p className="text-[10px] text-slate-500">
+                        Người thực hiện: <span className="text-slate-400">{h.performedBy}</span>
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Footer info */}
         <div className="text-center text-xs text-slate-500 space-y-1">
