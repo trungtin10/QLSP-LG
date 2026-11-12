@@ -9,8 +9,8 @@ import { protect, authorizeRoles } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-// Lấy danh sách phòng ban (yêu cầu đăng nhập hoặc có thể xem được)
-router.get("/", protect, getDepartments);
+// Lấy danh sách phòng ban (công khai phục vụ bộ lọc tìm kiếm và tra cứu)
+router.get("/", getDepartments);
 
 // Quyền thêm/sửa/xoá phòng ban
 router.post("/", protect, authorizeRoles("superadmin", "admin"), createDepartment);

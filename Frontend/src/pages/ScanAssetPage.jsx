@@ -90,7 +90,7 @@ export default function ScanAssetPage() {
   const StatusIcon = statusInfo.icon;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 py-10 px-4 sm:px-6 flex flex-col items-center">
+    <div className="min-h-screen bg-slate-950 text-slate-100 py-10 pb-24 sm:pb-10 px-4 sm:px-6 flex flex-col items-center">
       <div className="w-full max-w-md space-y-5">
         {/* Top Header Card */}
         <div className="text-center space-y-2">

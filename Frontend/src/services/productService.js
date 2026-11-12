@@ -1,6 +1,12 @@
 import api from "./api";
 
 export const productService = {
+  // Tìm kiếm công khai bằng Ajax không cần đăng nhập (hỗ trợ AbortSignal khi gõ nhanh)
+  searchPublic: async (params = {}, config = {}) => {
+    const response = await api.get("/products/public/search", { params, ...config });
+    return response.data;
+  },
+
   // Lấy danh sách sản phẩm (hỗ trợ search, department, status, page, limit)
   getProducts: async (params = {}) => {
     const response = await api.get("/products", { params });

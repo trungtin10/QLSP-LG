@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useLocation, useNavigate, Outlet } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { 
@@ -8,7 +9,9 @@ import {
   LogOut, 
   Crown, 
   User, 
-  ExternalLink 
+  ExternalLink,
+  Menu,
+  X 
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -16,6 +19,7 @@ export default function AdminLayout() {
   const { user, isSuperAdmin, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -30,13 +34,29 @@ export default function AdminLayout() {
     { label: "Quản lý Người dùng", path: "/admin/users", icon: Users },
   ];
 
+  const handleNavClick = () => {
+    setMobileMenuOpen(false);
+  };
+
   return (
     <div className="min-h-screen flex bg-slate-900 text-slate-100">
-      {/* Sidebar */}
-      <aside className="w-64 bg-slate-950 border-r border-slate-800 flex flex-col shrink-0">
-        {/* Brand */}
-        <div className="h-16 px-6 border-b border-slate-800 flex items-center justify-between">
-          <Link to="/admin/dashboard" className="flex items-center gap-2.5">
+      {/* Mobile Drawer Backdrop */}
+      {mobileMenuOpen && (
+        <div 
+          className="fixed inset-0 z-40 bg-black/70 backdrop-blur-xs md:hidden animate-fadeIn"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Sidebar (Desktop cố định & Mobile trượt ra) */}
+      <aside 
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-slate-950 border-r border-slate-800 flex flex-col shrink-0 transition-transform duration-300 ease-in-out md:static md:w-64 md:translate-x-0 ${
+          mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        {/* Brand Header */}
+        <div className="h-16 px-5 border-b border-slate-800 flex items-center justify-between">
+          <Link to="/admin/dashboard" onClick={handleNavClick} className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md">
               <ShieldCheck className="w-5 h-5" />
             </div>
@@ -45,6 +65,16 @@ export default function AdminLayout() {
               <p className="text-[10px] text-blue-400 font-semibold tracking-wider uppercase">System Admin</p>
             </div>
           </Link>
+
+          {/* Nút đóng Sidebar trên mobile */}
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(false)}
+            className="md:hidden p-1.5 text-slate-400 hover:text-white rounded-lg transition"
+            aria-label="Đóng menu"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         {/* User Info & Role Badge */}
@@ -81,6 +111,7 @@ export default function AdminLayout() {
               <Link
                 key={item.label}
                 to={item.path}
+                onClick={handleNavClick}
                 className={`flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition ${
                   active
                     ? "bg-blue-600 text-white font-semibold shadow-md shadow-blue-600/30"
@@ -120,17 +151,30 @@ export default function AdminLayout() {
 
       {/* Main Content View */}
       <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-        <header className="h-16 px-6 border-b border-slate-800 bg-slate-950/60 backdrop-blur-md flex items-center justify-between sticky top-0 z-40">
-          <div>
-            <h1 className="text-base font-semibold text-white">Bảng Điều Khiển Quản Trị</h1>
+        <header className="h-16 px-4 sm:px-6 border-b border-slate-800 bg-slate-950/70 backdrop-blur-md flex items-center justify-between sticky top-0 z-30">
+          <div className="flex items-center gap-3">
+            {/* Hamburger Button trên mobile */}
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(true)}
+              className="md:hidden p-2 -ml-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition cursor-pointer"
+              aria-label="Mở menu quản trị"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+
+            <h1 className="text-sm sm:text-base font-semibold text-white truncate">
+              {menuItems.find((m) => m.path === location.pathname)?.label || "Bảng Điều Khiển Quản Trị"}
+            </h1>
           </div>
-          <div className="flex items-center gap-3 text-xs text-slate-400">
-            <span>Máy chủ API: <strong className="text-emerald-400">Online</strong></span>
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+
+          <div className="flex items-center gap-2 sm:gap-3 text-xs text-slate-400">
+            <span className="hidden sm:inline">Máy chủ API: <strong className="text-emerald-400">Online</strong></span>
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
           </div>
         </header>
 
-        <main className="p-6 flex-1 bg-slate-900">
+        <main className="p-4 sm:p-6 flex-1 bg-slate-900">
           <Outlet />
         </main>
       </div>

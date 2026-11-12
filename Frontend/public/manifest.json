@@ -1,0 +1,19 @@
+{
+  "short_name": "GPLX Việt Nam",
+  "name": "Hệ Thống Quản Lý & Tra Cứu Thiết Bị GPLX",
+  "description": "Cổng thông tin và tra cứu trang thiết bị sát hạch, xe tập lái DAT trực tuyến",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/home",
+  "background_color": "#0f172a",
+  "theme_color": "#1d4ed8",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "lang": "vi"
+}

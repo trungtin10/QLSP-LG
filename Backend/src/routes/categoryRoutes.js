@@ -9,8 +9,8 @@ import { protect, authorizeRoles } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-// Lấy danh mục loại thiết bị
-router.get("/", protect, getCategories);
+// Lấy danh mục loại thiết bị (công khai phục vụ bộ lọc tìm kiếm và tra cứu)
+router.get("/", getCategories);
 
 // Quyền thêm/sửa/xoá loại thiết bị
 router.post("/", protect, authorizeRoles("superadmin", "admin"), createCategory);
