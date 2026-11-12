@@ -211,7 +211,7 @@ export default function HomePage({ onOpenScanner }) {
           {/* Badge nhận diện */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-blue-200 text-xs font-semibold shadow-inner">
             <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>HỆ THỐNG TRA CỨU & QUẢN LÝ THIẾT BỊ GPLX VIỆT NAM</span>
+            <span>HỆ THỐNG QUẢN LÝ THIẾT BỊ GPLX </span>
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
           </div>
 

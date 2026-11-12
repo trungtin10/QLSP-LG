@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { toast } from "sonner";
+import logoTTin from "../../assets/logoTTin.png";
 import { ShieldCheck, User, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 
 export default function LoginPage() {
@@ -53,8 +54,8 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 text-slate-100">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <div className="mx-auto w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-xl shadow-blue-500/20 mb-4">
-          <ShieldCheck className="w-8 h-8" />
+        <div className="mx-auto w-16 h-16 rounded-2xl bg-white flex items-center justify-center p-1.5 shadow-xl shadow-blue-500/20 mb-4 overflow-hidden border border-slate-700/50">
+          <img src={logoTTin} alt="Logo GPLX" className="w-full h-full object-contain" />
         </div>
         <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
           Đăng Nhập Hệ Thống

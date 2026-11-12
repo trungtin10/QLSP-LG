@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate, Outlet } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import logoTTin from "../assets/logoTTin.png";
 import { 
   LayoutDashboard, 
   Package,
@@ -57,8 +58,8 @@ export default function AdminLayout() {
         {/* Brand Header */}
         <div className="h-16 px-5 border-b border-slate-800 flex items-center justify-between">
           <Link to="/admin/dashboard" onClick={handleNavClick} className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-md">
-              <ShieldCheck className="w-5 h-5" />
+            <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center p-0.5 shadow-md overflow-hidden shrink-0">
+              <img src={logoTTin} alt="Logo GPLX" className="w-full h-full object-contain" />
             </div>
             <div>
               <p className="font-bold text-sm text-white tracking-wide">GPLX PORTAL</p>
@@ -75,31 +76,6 @@ export default function AdminLayout() {
           >
             <X className="w-5 h-5" />
           </button>
-        </div>
-
-        {/* User Info & Role Badge */}
-        <div className="p-4 border-b border-slate-800/80 bg-slate-900/50">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-300 font-semibold border border-slate-700">
-              {user?.fullName?.charAt(0) || <User className="w-5 h-5" />}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-white truncate">{user?.fullName || user?.username}</p>
-              <div className="mt-0.5">
-                {isSuperAdmin ? (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-950 text-purple-300 border border-purple-800/60 uppercase">
-                    <Crown className="w-3 h-3 text-purple-400" />
-                    Superadmin
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-950 text-blue-300 border border-blue-800/60 uppercase">
-                    <ShieldCheck className="w-3 h-3 text-blue-400" />
-                    Admin
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Nav Links */}
@@ -168,9 +144,39 @@ export default function AdminLayout() {
             </h1>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3 text-xs text-slate-400">
-            <span className="hidden sm:inline">Máy chủ API: <strong className="text-emerald-400">Online</strong></span>
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="hidden lg:flex items-center gap-2 text-xs text-slate-400 border-r border-slate-800 pr-4">
+              <span>Máy chủ API: <strong className="text-emerald-400">Online</strong></span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            </div>
+
+            {/* Họ tên và Account ở góc phải */}
+            <div className="flex items-center gap-3">
+              <div className="text-right hidden sm:block">
+                <p className="text-sm font-semibold text-white leading-tight truncate max-w-[180px]">
+                  {user?.fullName || user?.username}
+                </p>
+                <div className="mt-0.5 flex justify-end">
+                  {isSuperAdmin ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-950 text-purple-300 border border-purple-800/60 uppercase">
+                      <Crown className="w-3 h-3 text-purple-400" />
+                      Superadmin
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-950 text-blue-300 border border-blue-800/60 uppercase">
+                      <ShieldCheck className="w-3 h-3 text-blue-400" />
+                      Admin
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div 
+                className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-200 font-semibold border border-slate-700 shadow-sm shrink-0"
+                title={`${user?.fullName || user?.username} (${isSuperAdmin ? "Superadmin" : "Admin"})`}
+              >
+                {user?.fullName?.charAt(0) || <User className="w-5 h-5" />}
+              </div>
+            </div>
           </div>
         </header>
 
