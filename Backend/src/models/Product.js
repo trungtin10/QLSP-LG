@@ -156,13 +156,18 @@ productSchema.pre("save", function () {
         }
     }
 
-    // Đảm bảo quantity luôn bằng tổng các thành phần
-    const totalBreakdown = (Number(this.quantityActive) || 0) + 
-                           (Number(this.quantityMaintenance) || 0) + 
-                           (Number(this.quantityStorage) || 0) + 
-                           (Number(this.quantityBroken) || 0);
-    if (totalBreakdown > 0) {
-        this.quantity = totalBreakdown;
+    // Đảm bảo quantity và quantityActive luôn đồng bộ
+    const nonActive = (Number(this.quantityMaintenance) || 0) + 
+                      (Number(this.quantityStorage) || 0) + 
+                      (Number(this.quantityBroken) || 0);
+    if (this.quantity !== undefined && this.quantity !== null) {
+        const total = Math.max(1, Number(this.quantity) || 1);
+        if (total >= nonActive) {
+            this.quantityActive = total - nonActive;
+        }
+        this.quantity = (Number(this.quantityActive) || 0) + nonActive;
+    } else {
+        this.quantity = (Number(this.quantityActive) || 0) + nonActive;
     }
 });
 

@@ -71,7 +71,17 @@ export default function DeviceFormModal({
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    const finalQuantity = Math.max(1, parseInt(formData.quantity, 10) || 1);
+    const nonActive = (Number(formData.quantityMaintenance) || 0) + 
+                      (Number(formData.quantityStorage) || 0) + 
+                      (Number(formData.quantityBroken) || 0);
+    const finalActive = Math.max(0, finalQuantity - nonActive);
+
+    onSubmit({
+      ...formData,
+      quantity: finalQuantity,
+      quantityActive: finalActive,
+    });
   };
 
   return (
@@ -203,7 +213,13 @@ export default function DeviceFormModal({
                 required
                 placeholder="1"
                 value={formData.quantity}
-                onChange={(e) => setFormData({ ...formData, quantity: Math.max(1, parseInt(e.target.value, 10) || 1) })}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setFormData((prev) => ({
+                    ...prev,
+                    quantity: val === "" ? "" : val,
+                  }));
+                }}
                 className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 text-xs focus:ring-2 focus:ring-blue-500 shadow-xs"
               />
             </div>

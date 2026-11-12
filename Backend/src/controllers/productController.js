@@ -386,16 +386,22 @@ export const updateProduct = async (req, res) => {
         if (managerPhone !== undefined) product.managerPhone = managerPhone.trim();
         if (status) product.status = status;
 
-        if (quantityActive !== undefined) product.quantityActive = Math.max(0, Number(quantityActive));
-        if (quantityMaintenance !== undefined) product.quantityMaintenance = Math.max(0, Number(quantityMaintenance));
-        if (quantityStorage !== undefined) product.quantityStorage = Math.max(0, Number(quantityStorage));
-        if (quantityBroken !== undefined) product.quantityBroken = Math.max(0, Number(quantityBroken));
-
-        if (quantity !== undefined && quantityActive === undefined && quantityMaintenance === undefined) {
-            product.quantity = Math.max(1, Number(quantity) || 1);
-            product.quantityActive = product.quantity;
-            product.quantityMaintenance = 0;
+        if (quantity !== undefined) {
+            const newTotal = Math.max(1, Number(quantity) || 1);
+            const maint = quantityMaintenance !== undefined ? Math.max(0, Number(quantityMaintenance)) : (product.quantityMaintenance || 0);
+            const stor = quantityStorage !== undefined ? Math.max(0, Number(quantityStorage)) : (product.quantityStorage || 0);
+            const brok = quantityBroken !== undefined ? Math.max(0, Number(quantityBroken)) : (product.quantityBroken || 0);
+            
+            product.quantityMaintenance = maint;
+            product.quantityStorage = stor;
+            product.quantityBroken = brok;
+            product.quantity = newTotal;
+            product.quantityActive = Math.max(0, newTotal - (maint + stor + brok));
         } else {
+            if (quantityActive !== undefined) product.quantityActive = Math.max(0, Number(quantityActive));
+            if (quantityMaintenance !== undefined) product.quantityMaintenance = Math.max(0, Number(quantityMaintenance));
+            if (quantityStorage !== undefined) product.quantityStorage = Math.max(0, Number(quantityStorage));
+            if (quantityBroken !== undefined) product.quantityBroken = Math.max(0, Number(quantityBroken));
             product.quantity = (product.quantityActive || 0) + 
                                (product.quantityMaintenance || 0) + 
                                (product.quantityStorage || 0) + 
