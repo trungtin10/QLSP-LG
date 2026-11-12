@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { QrCode, X, Printer, Download, Copy, ExternalLink, Check, Sliders, LayoutTemplate } from "lucide-react";
+import { QrCode, X, Printer, Download, Copy, ExternalLink, Check, Sliders, LayoutGrid } from "lucide-react";
 import { QRCodeCanvas } from "qrcode.react";
 import { toast } from "sonner";
 
@@ -8,9 +8,9 @@ const SIZE_PRESETS = [
   {
     id: "sm",
     label: "Nhỏ (S)",
-    sub: "40×40 mm",
-    qrDisplaySize: 140,
-    printBoxWidth: 175,
+    sub: "40×35 mm",
+    qrDisplaySize: 150,
+    printBoxWidth: 190,
     printQrSize: 130,
     headerSize: 10,
     codeSize: 13,
@@ -20,50 +20,47 @@ const SIZE_PRESETS = [
   {
     id: "md",
     label: "Chuẩn (M)",
-    sub: "60×60 mm",
-    qrDisplaySize: 190,
-    printBoxWidth: 235,
-    printQrSize: 175,
+    sub: "60×50 mm",
+    qrDisplaySize: 200,
+    printBoxWidth: 250,
+    printQrSize: 170,
     headerSize: 11,
     codeSize: 16,
-    nameSize: 12.5,
+    nameSize: 12,
     infoSize: 11,
   },
   {
     id: "lg",
     label: "Lớn (L)",
-    sub: "80×80 mm",
-    qrDisplaySize: 230,
-    printBoxWidth: 290,
+    sub: "80×70 mm",
+    qrDisplaySize: 240,
+    printBoxWidth: 320,
     printQrSize: 220,
     headerSize: 12.5,
     codeSize: 18,
-    nameSize: 14,
+    nameSize: 13.5,
     infoSize: 12,
   },
   {
     id: "xl",
     label: "Đại (XL)",
-    sub: "100×100 mm",
+    sub: "100×90 mm",
     qrDisplaySize: 270,
-    printBoxWidth: 350,
+    printBoxWidth: 390,
     printQrSize: 270,
     headerSize: 14,
     codeSize: 22,
-    nameSize: 16,
+    nameSize: 15,
     infoSize: 13.5,
   },
 ];
 
 export default function DeviceQrModal({ product, onClose }) {
   const [copied, setCopied] = useState(false);
+  const [templateType, setTemplateType] = useState("compact"); // "compact": Chuẩn Hình 4 (Mặc định) | "detailed": Đầy đủ
   const [selectedSizeId, setSelectedSizeId] = useState("md");
-  const [customQrSize, setCustomQrSize] = useState(190);
+  const [customQrSize, setCustomQrSize] = useState(200);
   const [isCustomMode, setIsCustomMode] = useState(false);
-  
-  // Mẫu in tem: "compact" (Mẫu Hình 4 - Mặc định) hoặc "full" (Mẫu Hình 2 - Đầy đủ)
-  const [labelTemplate, setLabelTemplate] = useState("compact");
-  
   const canvasRef = useRef(null);
 
   if (!product) return null;
@@ -74,14 +71,12 @@ export default function DeviceQrModal({ product, onClose }) {
   // Kích thước QR hiển thị trên màn hình
   const activeQrSize = isCustomMode ? customQrSize : currentPreset.qrDisplaySize;
   
-  // Kích thước khi in thực tế
-  const printWidth = isCustomMode 
-    ? Math.round(customQrSize * (labelTemplate === "compact" ? 1.25 : 1.35)) 
-    : (labelTemplate === "compact" ? Math.round(currentPreset.printQrSize * 1.25) : currentPreset.printBoxWidth);
+  // Kích thước khi in thực tế (tính theo tỷ lệ nếu ở chế độ tùy chỉnh)
+  const printWidth = isCustomMode ? Math.round(customQrSize * 1.3) : currentPreset.printBoxWidth;
   const printQr = isCustomMode ? customQrSize : currentPreset.printQrSize;
   const headerFont = isCustomMode ? Math.max(9, Math.round(customQrSize * 0.055)) : currentPreset.headerSize;
-  const codeFont = isCustomMode ? Math.max(12, Math.round(customQrSize * 0.085)) : currentPreset.codeSize;
-  const nameFont = isCustomMode ? Math.max(10, Math.round(customQrSize * 0.065)) : currentPreset.nameSize;
+  const codeFont = isCustomMode ? Math.max(12, Math.round(customQrSize * 0.08)) : currentPreset.codeSize;
+  const nameFont = isCustomMode ? Math.max(10, Math.round(customQrSize * 0.06)) : currentPreset.nameSize;
   const infoFont = isCustomMode ? Math.max(9, Math.round(customQrSize * 0.055)) : currentPreset.infoSize;
 
   // Luôn lấy URL tra cứu theo domain hiện tại của trình duyệt (ví dụ: https://qlsp-lg.onrender.com/scan/TB-001)
@@ -127,7 +122,7 @@ export default function DeviceQrModal({ product, onClose }) {
       return;
     }
 
-    const isCompact = labelTemplate === "compact";
+    const isCompact = templateType === "compact";
 
     printWindow.document.write(`
       <!DOCTYPE html>
@@ -136,13 +131,13 @@ export default function DeviceQrModal({ product, onClose }) {
           <title>Tem QR - ${product.code}</title>
           <style>
             @media print {
-              @page { margin: 3mm; size: auto; }
+              @page { margin: 2mm; size: auto; }
               body { margin: 0; padding: 0; }
             }
             body { 
               font-family: 'Segoe UI', Arial, Helvetica, sans-serif; 
               margin: 0; 
-              padding: 10px; 
+              padding: 8px; 
               text-align: center; 
               background: #fff;
               color: #000;
@@ -150,12 +145,14 @@ export default function DeviceQrModal({ product, onClose }) {
             .label-box { 
               width: ${printWidth}px; 
               border: 2px dashed #000; 
-              padding: 12px 10px; 
+              padding: ${isCompact ? "12px 10px" : "10px"}; 
               border-radius: 8px; 
               margin: 0 auto; 
               box-sizing: border-box; 
               text-align: center; 
               background: #fff;
+              page-break-inside: avoid;
+              break-inside: avoid;
             }
             .header {
               font-size: ${headerFont}px;
@@ -170,30 +167,29 @@ export default function DeviceQrModal({ product, onClose }) {
             .qr-img { 
               width: ${printQr}px; 
               height: ${printQr}px; 
-              margin: 0 auto 6px; 
+              margin: 0 auto 5px; 
               display: block; 
             }
             .code { 
               font-size: ${codeFont}px; 
               font-weight: 900; 
-              letter-spacing: 2px; 
+              letter-spacing: 1.5px; 
               color: #000; 
               text-transform: uppercase; 
               font-family: 'Courier New', Courier, monospace;
-              margin-top: 4px;
             }
             .name {
               font-size: ${nameFont}px;
               font-weight: bold;
-              color: #000;
-              margin-top: 4px;
+              color: #222;
+              margin: 3px 0 0;
               line-height: 1.3;
             }
             .info-table {
               width: 100%;
               border-top: 1px dashed #aaa;
-              margin-top: 6px;
-              padding-top: 6px;
+              margin-top: 5px;
+              padding-top: 5px;
               text-align: left;
               font-size: ${infoFont}px;
               line-height: 1.45;
@@ -224,31 +220,35 @@ export default function DeviceQrModal({ product, onClose }) {
         </head>
         <body>
           <div class="label-box">
-            ${!isCompact ? `<div class="header">HỆ THỐNG QUẢN LÝ THIẾT BỊ GPLX</div>` : ""}
+            <div class="header">HỆ THỐNG QUẢN LÝ THIẾT BỊ GPLX</div>
             <img class="qr-img" src="${qrImage}" alt="${product.code}" />
             <div class="code">${product.code}</div>
             <div class="name">${product.name}</div>
-            ${!isCompact ? `
-              <div class="info-table">
-                <div class="info-row">
-                  <span class="info-label">Vị trí:</span>
-                  <span class="info-val">${product.department || "—"}</span>
-                </div>
-                <div class="info-row">
-                  <span class="info-label">Người quản lý:</span>
-                  <span class="info-val">${product.manager || "Ban Quản Lý"}</span>
-                </div>
-                <div class="info-row">
-                  <span class="info-label">Số lượng:</span>
-                  <span class="info-val">${product.quantity || 1}</span>
-                </div>
-                <div class="info-row">
-                  <span class="info-label">SDT:</span>
-                  <span class="info-val">${product.managerPhone || "—"}</span>
-                </div>
+            ${
+              !isCompact
+                ? `
+            <div class="info-table">
+              <div class="info-row">
+                <span class="info-label">Vị trí:</span>
+                <span class="info-val">${product.department || "—"}</span>
               </div>
-              <div class="url">${scanUrl}</div>
-            ` : ""}
+              <div class="info-row">
+                <span class="info-label">Người quản lý:</span>
+                <span class="info-val">${product.manager || "Ban Quản Lý"}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Số lượng:</span>
+                <span class="info-val">${product.quantity || 1}</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">SDT:</span>
+                <span class="info-val">${product.managerPhone || "—"}</span>
+              </div>
+            </div>
+            <div class="url">${scanUrl}</div>
+                `
+                : ""
+            }
           </div>
           <script>
             window.onload = function() { 
@@ -281,39 +281,34 @@ export default function DeviceQrModal({ product, onClose }) {
 
         {/* Nội dung Modal (Cuộn mượt) */}
         <div className="p-5 text-center space-y-4 overflow-y-auto flex-1">
-          {/* ================= CHỌN MẪU IN TEM ================= */}
-          <div className="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800 text-left space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
-                <LayoutTemplate className="w-3.5 h-3.5 text-blue-400" />
-                Kiểu mẫu tem in dán:
-              </span>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
+          {/* ================= CHỌN MẪU TEM IN ================= */}
+          <div className="bg-slate-950/80 p-2.5 rounded-xl border border-slate-800 text-left space-y-1.5">
+            <span className="text-[11px] font-semibold text-slate-300 flex items-center gap-1.5">
+              <LayoutGrid className="w-3.5 h-3.5 text-blue-400" />
+              Chọn kiểu mẫu in tem dán:
+            </span>
+            <div className="grid grid-cols-2 gap-1.5">
               <button
                 type="button"
-                onClick={() => setLabelTemplate("compact")}
-                className={`py-2 px-3 rounded-lg border text-left transition cursor-pointer ${
-                  labelTemplate === "compact"
-                    ? "bg-blue-600/20 border-blue-500 text-white font-bold"
-                    : "bg-slate-900/80 border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800"
+                onClick={() => setTemplateType("compact")}
+                className={`py-2 px-2.5 rounded-lg border text-xs font-semibold transition cursor-pointer text-center ${
+                  templateType === "compact"
+                    ? "bg-blue-600 border-blue-500 text-white shadow-md shadow-blue-600/30 font-bold"
+                    : "bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800"
                 }`}
               >
-                <div className="text-xs text-white">Mẫu Hình 4 (Gọn nhẹ) ★</div>
-                <div className="text-[10px] text-slate-400 mt-0.5">Chỉ gồm Mã QR + Tên + Mã ID</div>
+                Mẫu gọn (Chuẩn Hình 4)
               </button>
-
               <button
                 type="button"
-                onClick={() => setLabelTemplate("full")}
-                className={`py-2 px-3 rounded-lg border text-left transition cursor-pointer ${
-                  labelTemplate === "full"
-                    ? "bg-blue-600/20 border-blue-500 text-white font-bold"
-                    : "bg-slate-900/80 border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800"
+                onClick={() => setTemplateType("detailed")}
+                className={`py-2 px-2.5 rounded-lg border text-xs font-semibold transition cursor-pointer text-center ${
+                  templateType === "detailed"
+                    ? "bg-blue-600 border-blue-500 text-white shadow-md shadow-blue-600/30 font-bold"
+                    : "bg-slate-900 border-slate-800 text-slate-400 hover:text-white hover:bg-slate-800"
                 }`}
               >
-                <div className="text-xs text-white">Mẫu Đầy Đủ (Hình 2)</div>
-                <div className="text-[10px] text-slate-400 mt-0.5">Kèm bảng Vị trí, Quản lý, SDT</div>
+                Mẫu đầy đủ chi tiết
               </button>
             </div>
           </div>
@@ -323,7 +318,7 @@ export default function DeviceQrModal({ product, onClose }) {
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-200 flex items-center gap-1.5">
                 <Sliders className="w-3.5 h-3.5 text-blue-400" />
-                Kích thước tem & mã QR:
+                Kích thước tem in & mã QR:
               </span>
               <button
                 type="button"
@@ -371,15 +366,15 @@ export default function DeviceQrModal({ product, onClose }) {
                 />
                 <div className="flex justify-between text-[10px] text-slate-500 font-mono">
                   <span>120px (Nhỏ)</span>
-                  <span>190px (Chuẩn)</span>
+                  <span>200px (Chuẩn)</span>
                   <span>320px (Rất lớn)</span>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Vùng hiển thị Tem dán theo đúng mẫu Hình số 4 */}
-          <div className="p-4 bg-white rounded-2xl shadow-inner border-2 border-dashed border-slate-800 inline-block transition-all duration-150 text-center">
+          {/* Vùng hiển thị Canvas QR Code thế hệ mới, thay đổi kích thước linh hoạt */}
+          <div className="p-4 bg-white rounded-2xl shadow-inner border border-slate-300 inline-block transition-all duration-150">
             <QRCodeCanvas
               id="device-qr-canvas"
               ref={canvasRef}
@@ -389,10 +384,10 @@ export default function DeviceQrModal({ product, onClose }) {
               marginSize={2}
               className="mx-auto rounded-lg"
             />
-            <p className="mt-2.5 text-sm font-mono font-black text-slate-900 tracking-widest uppercase">
+            <p className="mt-2 text-xs font-mono font-black text-slate-900 tracking-wider">
               {product.code}
             </p>
-            <p className="mt-0.5 text-xs font-bold text-slate-800 max-w-[240px] truncate">
+            <p className="mt-0.5 text-xs font-bold text-slate-800 truncate max-w-[240px]">
               {product.name}
             </p>
           </div>
@@ -465,7 +460,7 @@ export default function DeviceQrModal({ product, onClose }) {
             className="flex items-center justify-center gap-1.5 py-2.5 px-3 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-xl shadow-md transition cursor-pointer"
           >
             <Printer className="w-4 h-4" />
-            In tem ({labelTemplate === "compact" ? "Hình 4" : "Chi tiết"})
+            In tem ({templateType === "compact" ? "Hình 4" : "Chi tiết"})
           </button>
           <button
             type="button"
