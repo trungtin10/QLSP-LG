@@ -172,28 +172,13 @@ export default function ScanAssetPage() {
               <span className="font-semibold text-white">{product.category || "Thiết bị"}</span>
             </div>
             <div>
-              <span className="text-slate-400 block text-[11px]">Số lượng tổng:</span>
-              <p className="font-bold text-blue-400 text-sm">{product.quantity || 1} cái/bộ</p>
-              <div className="mt-1 space-y-0.5 text-[11px]">
-                <p className="text-emerald-400 font-medium">
-                  🟢 Hoạt động: <strong className="text-white">{product.quantityActive !== undefined ? product.quantityActive : (product.quantity || 1)}</strong>
+              <span className="text-slate-400 block text-[11px]">Số lượng:</span>
+              <p className="font-bold text-blue-400">{product.quantity || 1} cái/bộ</p>
+              {product.quantityMaintenance > 0 && (
+                <p className="text-amber-400 font-medium text-[11px] mt-0.5">
+                  🟡 Đang bảo trì: <strong className="text-white">{product.quantityMaintenance}</strong>
                 </p>
-                {product.quantityMaintenance > 0 && (
-                  <p className="text-amber-400 font-medium">
-                    🟡 Đang bảo trì: <strong className="text-white">{product.quantityMaintenance}</strong>
-                  </p>
-                )}
-                {product.quantityStorage > 0 && (
-                  <p className="text-cyan-400 font-medium">
-                    🔵 Lưu kho: <strong className="text-white">{product.quantityStorage}</strong>
-                  </p>
-                )}
-                {product.quantityBroken > 0 && (
-                  <p className="text-rose-400 font-medium">
-                    🔴 Báo hỏng: <strong className="text-white">{product.quantityBroken}</strong>
-                  </p>
-                )}
-              </div>
+              )}
             </div>
 
             {product.serialNumber && (

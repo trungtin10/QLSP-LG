@@ -318,26 +318,11 @@ export default function DeviceTab({
                         <span className="font-bold text-white text-xs block">
                           {p.quantity || 1} cái/bộ
                         </span>
-                        <div className="flex flex-col items-center gap-0.5 mt-1 text-[10px]">
-                          <span className="text-emerald-400 font-medium">
-                            🟢 {p.quantityActive !== undefined ? p.quantityActive : (p.quantity || 1)} hoạt động
+                        {p.quantityMaintenance > 0 && (
+                          <span className="inline-block mt-0.5 text-[10px] text-amber-400 font-medium">
+                            🟡 {p.quantityMaintenance} bảo trì
                           </span>
-                          {p.quantityMaintenance > 0 && (
-                            <span className="text-amber-400 font-medium">
-                              🟡 {p.quantityMaintenance} bảo trì
-                            </span>
-                          )}
-                          {p.quantityStorage > 0 && (
-                            <span className="text-cyan-400 font-medium">
-                              🔵 {p.quantityStorage} trong kho
-                            </span>
-                          )}
-                          {p.quantityBroken > 0 && (
-                            <span className="text-rose-400 font-medium">
-                              🔴 {p.quantityBroken} hỏng
-                            </span>
-                          )}
-                        </div>
+                        )}
                       </td>
                       <td className="py-3 px-3">
                         <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${statusInfo.color}`}>
